@@ -229,7 +229,6 @@ If `OPENAI_API_KEY` is not set or is still the placeholder value, all functions 
 | `E` | Archive conversation |
 | `A` | Toggle AI assistant panel |
 | `N` | Toggle notification center |
-| `Shift + D` | Toggle dark mode |
 | `?` | Open this shortcut list |
 | `Escape` | Close open panels / dialogs |
 
