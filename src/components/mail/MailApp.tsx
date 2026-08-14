@@ -26,7 +26,6 @@ import { useMailStore } from "./use-mail-store";
 import { cn } from "@/lib/utils";
 
 const SHORTCUTS: [string, string][] = [
-  ["C", "Compose a new message"],
   ["J / K", "Next / previous conversation"],
   ["/", "Focus search"],
   ["U", "Toggle read state"],
@@ -137,10 +136,6 @@ export function MailApp() {
       }
       const id = mail.selected?.id;
       switch (e.key) {
-        case "c":
-          e.preventDefault();
-          setComposer({});
-          break;
         case "j":
           mail.moveSelection(1);
           break;

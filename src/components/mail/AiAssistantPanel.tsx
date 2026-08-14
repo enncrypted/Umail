@@ -365,14 +365,14 @@ export function AiAssistantPanel({
       </div>
 
       <p className="border-t border-border px-4 py-2 text-[10px] text-muted-foreground">
-        Powered by OpenAI {getModelLabel(modelUsed)} · Secure server execution.
+        Powered by {getModelLabel(modelUsed)} · Secure server execution.
       </p>
     </aside>
   );
 }
 
 function getModelLabel(modelUsed: string): string {
-  return modelUsed.includes("simulated") ? "gpt-4o-mini (demo mode)" : modelUsed;
+  return modelUsed.includes("gpt-4o-mini") ? "gpt-4o-mini" : modelUsed;
 }
 
 function Tab({
