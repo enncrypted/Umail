@@ -7,13 +7,13 @@ import { MailApp } from "@/components/mail/MailApp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "EM — Contoso Enterprise Mail" },
+      { title: "Umail — UserFacet Enterprise Mail" },
       {
         name: "description",
         content:
           "A fast, accessible enterprise email client with AI thread summaries, contextual replies, priority inbox, scheduled send and undo send.",
       },
-      { property: "og:title", content: "EM — Contoso Enterprise Mail" },
+      { property: "og:title", content: "Umail — UserFacet Enterprise Mail" },
       {
         property: "og:description",
         content:

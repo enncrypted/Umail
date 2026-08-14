@@ -1,6 +1,6 @@
 import { Inbox, ListFilter, Paperclip, Settings2, Star } from "lucide-react";
 import { initials, type Email, type FolderId } from "@/lib/mock-data";
-import type { FilterId } from "./use-mail-store";
+import type { FilterId, SortBy } from "./use-mail-store";
 import { cn } from "@/lib/utils";
 
 const FILTERS: { id: FilterId; label: string }[] = [
@@ -27,6 +27,8 @@ export function EmailList({
   selectedId,
   filter,
   onFilter,
+  sortBy,
+  onSort,
   onOpen,
   onStar,
 }: {
@@ -36,12 +38,14 @@ export function EmailList({
   selectedId: string | null;
   filter: FilterId;
   onFilter: (f: FilterId) => void;
+  sortBy: SortBy;
+  onSort: (s: SortBy) => void;
   onOpen: (id: string) => void;
   onStar: (id: string) => void;
 }) {
   const isSpam = folder === "spam";
-  const priority = emails.filter((e) => e.priority);
-  const rest = emails.filter((e) => !e.priority);
+  const priority = isSpam ? [] : emails.filter((e) => e.priority);
+  const rest = isSpam ? emails : emails.filter((e) => !e.priority);
 
   return (
     <section
@@ -58,8 +62,23 @@ export function EmailList({
         )}
       >
         <h2 className="flex-1 truncate text-sm font-semibold">{TITLES[folder]}</h2>
-        <ListFilter className="size-4 text-muted-foreground" />
-        <Settings2 className="size-4 text-muted-foreground" />
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-1 cursor-pointer text-muted-foreground hover:text-foreground">
+            <ListFilter className="size-4" />
+            <select
+              value={sortBy}
+              onChange={(e) => onSort(e.target.value as SortBy)}
+              className="bg-transparent text-xs font-medium outline-none cursor-pointer appearance-none"
+              aria-label="Sort messages"
+            >
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="subject">Subject (A-Z)</option>
+              <option value="sender">Sender (A-Z)</option>
+              <option value="unread">Unread First</option>
+            </select>
+          </label>
+        </div>
       </header>
 
       <div className="flex gap-1 overflow-x-auto border-b border-border px-3 py-2">
@@ -206,7 +225,7 @@ function Row({
             <span className="shrink-0 text-[11px] text-muted-foreground">{email.time}</span>
           </span>
 
-          {email.priority && (
+          {email.priority && email.folder !== "spam" && (
             <span className="mt-0.5 inline-flex items-center rounded bg-warning/20 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-warning-foreground dark:text-warning">
               Priority
             </span>

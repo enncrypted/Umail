@@ -8,6 +8,7 @@ import {
 } from "@/lib/mock-data";
 
 export type FilterId = "all" | "unread" | "priority" | "attachments" | "starred";
+export type SortBy = "date-desc" | "date-asc" | "subject" | "sender" | "unread";
 
 function getStorageKey(prefix: string, userEmail?: string | null): string {
   const cleanKey = (userEmail ?? "default")
@@ -44,6 +45,7 @@ export function useMailStore(userEmail?: string | null) {
   const [loading, setLoading] = useState(true);
   const [folder, setFolder] = useState<FolderId>("inbox");
   const [filter, setFilter] = useState<FilterId>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("date-desc");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -53,10 +55,11 @@ export function useMailStore(userEmail?: string | null) {
     setLoading(true);
     setFolder("inbox");
     setFilter("all");
+    setSortBy("date-desc");
     setQuery("");
 
-    const mailKey = getStorageKey("em.mails", userEmail);
-    const notifKey = getStorageKey("em.notifs", userEmail);
+    const mailKey = getStorageKey("umail.mails", userEmail);
+    const notifKey = getStorageKey("umail.notifs", userEmail);
 
     const initialEmails = loadFromStorage<Email[]>(mailKey, getMockEmailsForUser(userEmail));
     const initialNotifs = loadFromStorage<AppNotification[]>(
@@ -81,7 +84,7 @@ export function useMailStore(userEmail?: string | null) {
     (updater: (prev: Email[]) => Email[]) => {
       setEmails((prev) => {
         const next = updater(prev);
-        const mailKey = getStorageKey("em.mails", userEmail);
+        const mailKey = getStorageKey("umail.mails", userEmail);
         saveToStorage(mailKey, next);
         return next;
       });
@@ -93,7 +96,7 @@ export function useMailStore(userEmail?: string | null) {
     (updater: (prev: AppNotification[]) => AppNotification[]) => {
       setNotifications((prev) => {
         const next = updater(prev);
-        const notifKey = getStorageKey("em.notifs", userEmail);
+        const notifKey = getStorageKey("umail.notifs", userEmail);
         saveToStorage(notifKey, next);
         return next;
       });
@@ -128,8 +131,15 @@ export function useMailStore(userEmail?: string | null) {
               .includes(q)
           : true,
       )
-      .sort((a, b) => Number(b.priority) - Number(a.priority));
-  }, [emails, folder, filter, query]);
+      .sort((a, b) => {
+        if (sortBy === "date-asc") return a.id.localeCompare(b.id);
+        if (sortBy === "subject") return a.subject.localeCompare(b.subject);
+        if (sortBy === "sender") return a.sender.localeCompare(b.sender);
+        if (sortBy === "unread") return Number(b.unread) - Number(a.unread);
+        // Default "date-desc": Priority first, then ID order
+        return Number(b.priority) - Number(a.priority);
+      });
+  }, [emails, folder, filter, query, sortBy]);
 
   const selected = useMemo(
     () => visible.find((e) => e.id === selectedId) ?? visible[0] ?? null,
@@ -210,6 +220,8 @@ export function useMailStore(userEmail?: string | null) {
     setFolder,
     filter,
     setFilter,
+    sortBy,
+    setSortBy,
     query,
     setQuery,
     visible,

@@ -92,8 +92,8 @@ export function AuthScreen() {
         <div className="flex items-center gap-2.5">
           <BrandMark />
           <div className="leading-tight">
-            <p className="text-sm font-semibold">EM</p>
-            <p className="text-[11px] text-muted-foreground">Contoso Enterprise Mail</p>
+            <p className="text-sm font-semibold">Umail</p>
+            <p className="text-[11px] text-muted-foreground">UserFacet Enterprise Mail</p>
           </div>
         </div>
         <ThemeSlider />
@@ -164,7 +164,7 @@ export function AuthScreen() {
               <h1 id="sign-in" className="text-xl font-semibold tracking-tight">
                 Sign in
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">Use your Contoso work account.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Use your UserFacet work account.</p>
 
               <form onSubmit={submitCredentials} className="mt-6 space-y-4" noValidate>
                 <Field
@@ -179,7 +179,7 @@ export function AuthScreen() {
                     autoComplete="username"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="you@contoso.com"
+                    placeholder="you@userfacet.com"
                     aria-invalid={Boolean(errors.identifier)}
                     className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
                   />
@@ -306,7 +306,7 @@ export function AuthScreen() {
                     type="text"
                     value={resetTarget}
                     onChange={(e) => setResetTarget(e.target.value)}
-                    placeholder="you@contoso.com"
+                    placeholder="you@userfacet.com"
                     aria-invalid={Boolean(errors.identifier)}
                     className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
                   />
@@ -353,7 +353,7 @@ export function AuthScreen() {
       </main>
 
       <footer className="relative z-10 pb-6 text-center text-[11px] text-muted-foreground">
-        Protected by Contoso single sign-on · Sessions expire after 8 hours
+        Protected by UserFacet single sign-on · Sessions expire after 8 hours
       </footer>
     </div>
   );

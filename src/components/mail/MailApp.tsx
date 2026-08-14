@@ -34,7 +34,6 @@ const SHORTCUTS: [string, string][] = [
   ["E", "Archive conversation"],
   ["A", "Toggle AI assistant"],
   ["N", "Notification center"],
-  ["Shift + D", "Toggle dark mode"],
   ["?", "This shortcut list"],
 ];
 
@@ -187,7 +186,7 @@ export function MailApp() {
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-panel px-3 py-2">
         <div className="flex items-center gap-2">
           <BrandMark />
-          <span className="hidden text-sm font-semibold sm:block">EM</span>
+          <span className="hidden text-sm font-semibold sm:block">Umail</span>
         </div>
 
         <div className="relative mx-2 flex min-w-0 flex-1 items-center">
@@ -322,6 +321,8 @@ export function MailApp() {
             selectedId={mail.selected?.id ?? null}
             filter={mail.filter}
             onFilter={mail.setFilter}
+            sortBy={mail.sortBy}
+            onSort={mail.setSortBy}
             onOpen={(id) => {
               mail.open(id);
               setAutoReply(null);

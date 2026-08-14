@@ -1,6 +1,6 @@
-# Nova Mail
+# Umail
 
-A full-featured, AI-powered email client built with **TanStack Start**, **React 19**, and **OpenAI**. Nova Mail delivers a premium inbox experience with real-time AI assistance — thread summarization, smart reply suggestions, auto-reply drafting, and prompt-based mail generation — all server-side with a clean, dark-mode-first UI.
+A full-featured, AI-powered email client built with **TanStack Start**, **React 19**, and **OpenAI**. Umail delivers a premium inbox experience with real-time AI assistance — thread summarization, smart reply suggestions, auto-reply drafting, and prompt-based mail generation — all server-side with a clean, dark-mode-first UI.
 
 ---
 
@@ -23,12 +23,12 @@ A full-featured, AI-powered email client built with **TanStack Start**, **React 
 | Feature | Details |
 |---|---|
 | **Folder navigation** | Inbox, Starred, Sent, Drafts, Scheduled, Archive, Spam, Trash |
-| **Email list** | Filter by All / Unread / Starred, live search across all fields |
+| **Email list** | Filter by All / Unread / Priority / Starred / Files, Sort by Date/Subject/Sender/Unread, live search across all fields |
 | **Thread view** | Collapsible message cards, attachment previews with download |
-| **Composer** | To / Cc / Bcc fields, subject, rich body, draft auto-save to `localStorage` |
+| **Composer** | To / Cc / Bcc fields, subject, rich body, instant draft auto-save + Save Draft button, attachment dropdown (Images, Docs, Other Files) |
 | **Send scheduling** | Send Now or schedule for a custom date/time with +1 hr / Tomorrow / +3 days quick presets |
 | **Undo send** | 8-second grace window after sending to retract a message |
-| **Spam warning** | Visual alert + disabled links/attachments for flagged threads |
+| **Spam warning** | Visual alert + disabled links/attachments for flagged threads, flat list without priority badges |
 | **Keyboard shortcuts** | Full keyboard-driven navigation (see [Keyboard Shortcuts](#keyboard-shortcuts)) |
 | **Mobile layout** | Responsive stack — email list → thread → back button; floating compose FAB |
 
@@ -41,8 +41,7 @@ A full-featured, AI-powered email client built with **TanStack Start**, **React 
 | **Action Items** | AI Assistant Panel | Extracts concrete `[owner] task — due date` bullets from the thread |
 | **Auto Reply Draft** | AI Assistant Panel | Drafts an editable reply pre-filled into the reply box, with Formal / Friendly / Concise / Executive tone controls |
 | **Smart Reply Chips** | AI Assistant Panel | 3 one-click quick-reply suggestion buttons generated per thread |
-| **AI Compose Assist** | Composer → *AI Assist* | Refine or polish the email body you're writing via a prompt |
-| **Generate New Mail** | Composer → *Generate* | Describe an email in plain English; AI writes the full **Subject + body** |
+| **AI Compose Assist** | Composer → *AI Assist* | Unified AI assistant to refine, polish, and draft email body copy via a prompt |
 
 All AI features fall back to high-quality offline demo content if no API key is configured.
 
@@ -111,7 +110,7 @@ nova-mail/
 │   │   │   ├── EmailList.tsx        # Filtered, searchable email list
 │   │   │   ├── ThreadView.tsx       # Message cards, attachments, inline reply
 │   │   │   ├── AiAssistantPanel.tsx # Summarize / Actions / Auto Reply + smart chips
-│   │   │   ├── Composer.tsx         # New message flyout with AI Assist & Generate
+│   │   │   ├── Composer.tsx         # New message flyout with AI Assist
 │   │   │   ├── CalendarView.tsx     # Calendar overlay
 │   │   │   ├── NotificationCenter.tsx
 │   │   │   └── use-mail-store.ts    # In-memory mail state hook
@@ -143,7 +142,7 @@ nova-mail/
 
 ```bash
 git clone <your-repo-url>
-cd nova-mail
+cd umail
 npm install
 # or: bun install
 ```
@@ -210,7 +209,6 @@ All defined in [`src/lib/ai.functions.ts`](./src/lib/ai.functions.ts) as TanStac
 | `assistWithEmail` | `summary` `reply` `action-items` `compose` | AI Assistant Panel, Composer AI Assist |
 | `summarizeEmail` | Dedicated summarizer | AI Assistant Panel (Summary tab) |
 | `autoSuggestReplies` | Returns 3 quick-reply chips | AI Assistant Panel (chip bar) |
-| `generateMailFromPrompt` | Full Subject + body from prompt | Composer → Generate panel |
 
 ### Offline / Demo Mode
 If `OPENAI_API_KEY` is not set or is still the placeholder value, all functions return high-quality hard-coded demo responses. The UI looks and behaves identically — labels just show `gpt-4o-mini (demo mode)`.
@@ -229,7 +227,6 @@ If `OPENAI_API_KEY` is not set or is still the placeholder value, all functions 
 | `E` | Archive conversation |
 | `A` | Toggle AI assistant panel |
 | `N` | Toggle notification center |
-| `Shift + D` | Toggle dark mode |
 | `?` | Open this shortcut list |
 | `Escape` | Close open panels / dialogs |
 

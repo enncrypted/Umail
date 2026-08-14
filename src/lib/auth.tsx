@@ -30,36 +30,36 @@ export interface Session {
   org: string;
 }
 
-const SESSION_KEY = "em.session";
-const ACCOUNTS_KEY = "em.accounts";
-const REMEMBER_KEY = "em.remember";
+const SESSION_KEY = "umail.session";
+const ACCOUNTS_KEY = "umail.accounts";
+const REMEMBER_KEY = "umail.remember";
 
 const DEFAULT_ACCOUNTS: SavedAccount[] = [
   {
     id: "acc-1",
     name: "Sarah J. Assenmon",
-    email: "sarah.j@contoso.com",
+    email: "sarah.j@userfacet.com",
     lastUsed: "Today",
-    org: "Contoso Corp",
+    org: "UserFacet Corp",
   },
   {
     id: "acc-2",
     name: "Mark Chen",
-    email: "mark.c@contoso.com",
+    email: "mark.c@userfacet.com",
     lastUsed: "Yesterday",
-    org: "Contoso Corp",
+    org: "UserFacet Corp",
   },
   {
     id: "acc-3",
     name: "Ops Service Account",
-    email: "ops.svc@contoso.com",
+    email: "ops.svc@userfacet.com",
     lastUsed: "Last week",
-    org: "Contoso IT",
+    org: "UserFacet IT",
   },
 ];
 
-/** Any account password below is "contoso" for the demo. */
-export const DEMO_PASSWORD = "contoso";
+/** Any account password below is "userfacet" for the demo. */
+export const DEMO_PASSWORD = "userfacet";
 
 interface AuthContextValue {
   session: Session | null;

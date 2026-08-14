@@ -6,13 +6,12 @@ import {
   Clock,
   Image,
   Loader2,
-  Lock,
-  MailPlus,
   Paperclip,
   Send,
   Sparkles,
-  Wand2,
   X,
+  FileText,
+  Files,
 } from "lucide-react";
 import { assistWithEmail, generateMailFromPrompt } from "@/lib/ai.functions";
 import { cn } from "@/lib/utils";
@@ -97,14 +96,21 @@ export function Composer({
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiPreview, setAiPreview] = useState<string | null>(null);
 
-  // AI Generate New Mail from Prompt state
-  const [showGenModal, setShowGenModal] = useState(false);
-  const [genPrompt, setGenPrompt] = useState("");
-  const [genTone, setGenTone] = useState<Tone>("formal");
-  const [genBusy, setGenBusy] = useState(false);
-  const [genPreview, setGenPreview] = useState<{ subject: string; body: string } | null>(null);
+  const [attachments, setAttachments] = useState<{ id: string; name: string }[]>([]);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files).map((f) => ({
+        id: Math.random().toString(36).substring(7),
+        name: f.name,
+      }));
+      setAttachments((prev) => [...prev, ...newFiles]);
+    }
+  }
 
   // Debounced draft auto-save.
   useEffect(() => {
@@ -114,7 +120,7 @@ export function Composer({
     timer.current = setTimeout(() => {
       window.localStorage.setItem("em.draft", JSON.stringify({ to, cc, bcc, subject, body }));
       setSaveState("saved");
-    }, 900);
+    }, 0);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
@@ -158,30 +164,6 @@ export function Composer({
       setBody(aiPreview);
       setShowAiModal(false);
       setAiPreview(null);
-    }
-  }
-
-  async function handleGenerateNewMail() {
-    if (!genPrompt.trim()) return;
-    setGenBusy(true);
-    setGenPreview(null);
-    try {
-      const res = await generateMail({ data: { prompt: genPrompt, tone: genTone } });
-      setGenPreview({ subject: res.subject, body: res.body });
-    } catch {
-      setGenPreview({ subject: "", body: "Failed to generate. Please try again." });
-    } finally {
-      setGenBusy(false);
-    }
-  }
-
-  function handleApplyGenerated() {
-    if (genPreview) {
-      if (genPreview.subject) setSubject(genPreview.subject);
-      setBody(genPreview.body);
-      setShowGenModal(false);
-      setGenPreview(null);
-      setGenPrompt("");
     }
   }
 
@@ -243,7 +225,7 @@ export function Composer({
               <input
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
-                placeholder="name@contoso.com"
+                placeholder="name@userfacet.com"
                 aria-label="Recipients"
                 className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
               />
@@ -275,7 +257,7 @@ export function Composer({
                 <input
                   value={cc}
                   onChange={(e) => setCc(e.target.value)}
-                  placeholder="cc@contoso.com"
+                  placeholder="cc@userfacet.com"
                   aria-label="Cc Recipients"
                   className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
                 />
@@ -301,7 +283,7 @@ export function Composer({
                 <input
                   value={bcc}
                   onChange={(e) => setBcc(e.target.value)}
-                  placeholder="bcc@contoso.com"
+                  placeholder="bcc@userfacet.com"
                   aria-label="Bcc Recipients"
                   className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
                 />
@@ -337,6 +319,20 @@ export function Composer({
             placeholder="Write your message or use AI Assist at bottom right to generate copy…"
             className="min-h-[14rem] flex-1 w-full resize-none bg-transparent px-4 py-3 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/70"
           />
+
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 px-4 pb-3">
+              {attachments.map((file) => (
+                <div key={file.id} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium shadow-sm">
+                  <Paperclip className="size-3 text-muted-foreground" />
+                  <span className="max-w-[120px] truncate">{file.name}</span>
+                  <button type="button" onClick={() => setAttachments(prev => prev.filter(f => f.id !== file.id))} className="text-muted-foreground hover:text-foreground">
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Dynamic Custom Date/Time Picker Bar when "Choose time" is selected */}
@@ -457,84 +453,6 @@ export function Composer({
           </div>
         )}
 
-        {/* ── Generate New Mail from Prompt ── */}
-        {showGenModal && (
-          <div className="border-t border-border bg-card p-4 space-y-3 shadow-flyout animate-fade-in">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <MailPlus className="size-3.5 text-primary" /> Generate New Mail from Prompt
-              </span>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-[11px]">
-                  <span className="text-muted-foreground font-medium">Tone:</span>
-                  {(["formal", "friendly", "concise", "executive"] as Tone[]).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setGenTone(t)}
-                      className={cn(
-                        "rounded px-2 py-0.5 capitalize transition-colors text-[11px]",
-                        genTone === t
-                          ? "bg-primary text-primary-foreground font-medium"
-                          : "text-muted-foreground hover:bg-accent",
-                      )}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { setShowGenModal(false); setGenPreview(null); }}
-                  className="rounded p-1 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="size-3.5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <textarea
-                value={genPrompt}
-                onChange={(e) => setGenPrompt(e.target.value)}
-                placeholder="Describe the email you want (e.g. 'Write a meeting request to the design team for a Q4 roadmap review next Tuesday')…"
-                rows={2}
-                className="flex-1 resize-none rounded-md border border-input bg-muted/30 px-3 py-2 text-xs outline-none focus:border-primary focus:shadow-focus"
-              />
-              <button
-                type="button"
-                onClick={handleGenerateNewMail}
-                disabled={genBusy || !genPrompt.trim()}
-                className="focus-ring flex items-center gap-1.5 self-end rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-60 shrink-0"
-              >
-                {genBusy ? <Loader2 className="size-3.5 animate-spin" /> : <Wand2 className="size-3.5" />}
-                {genBusy ? "Writing..." : "Write"}
-              </button>
-            </div>
-
-            {genPreview && (
-              <div className="space-y-2 border-t border-border/80 pt-2.5">
-                {genPreview.subject && (
-                  <div className="flex items-center gap-2 rounded-md border border-border bg-muted/20 px-2.5 py-1.5">
-                    <span className="text-[10px] font-semibold text-muted-foreground shrink-0">Subject:</span>
-                    <span className="text-xs font-medium text-foreground truncate">{genPreview.subject}</span>
-                  </div>
-                )}
-                <div className="max-h-32 overflow-y-auto whitespace-pre-line rounded-md border border-border bg-muted/20 p-2.5 text-xs leading-relaxed text-foreground">
-                  {genPreview.body}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleApplyGenerated}
-                  className="focus-ring w-full rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover"
-                >
-                  Use this Email &amp; Edit
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
         <footer className="flex flex-wrap items-center gap-2 border-t border-border px-4 py-3 bg-panel/30">
           {/* Main Action Button */}
           <button
@@ -547,6 +465,17 @@ export function Composer({
             {scheduleMode === "now"
               ? "Send Now"
               : `Schedule (${formatCustomDateTime(customDateTime)})`}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              window.localStorage.setItem("em.draft", JSON.stringify({ to, cc, bcc, subject, body }));
+              setSaveState("saved");
+            }}
+            className="focus-ring flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            Save Draft
           </button>
 
           {/* Dynamic Schedule Dropdown: 1st Option "Now", 2nd Option "Choose time" */}
@@ -564,36 +493,35 @@ export function Composer({
           </label>
 
           <div className="ml-auto flex items-center gap-1.5">
-            <Ghost label="Attach file">
-              <Paperclip className="size-4" />
-            </Ghost>
-            <Ghost label="Insert image">
-              <Image className="size-4" />
-            </Ghost>
-            <Ghost label="Encrypt message">
-              <Lock className="size-4" />
-            </Ghost>
-
-            {/* Generate New Mail from Prompt */}
-            <button
-              type="button"
-              onClick={() => { setShowGenModal((v) => !v); if (showAiModal) setShowAiModal(false); }}
-              aria-label="Generate email from prompt"
-              title="Generate New Mail from Prompt (AI)"
-              className={cn(
-                "focus-ring flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-200 shadow-sm",
-                showGenModal
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-primary/10 text-primary hover:bg-primary/20",
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowAttachMenu((v) => !v)}
+                className="focus-ring rounded-md p-1.5 text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground active:scale-95"
+                title="Attach file"
+              >
+                <Paperclip className="size-4" />
+              </button>
+              {showAttachMenu && (
+                <div className="absolute bottom-full right-0 mb-2 w-36 overflow-hidden rounded-lg border border-border bg-popover shadow-flyout animate-pop z-50">
+                  <button type="button" onClick={() => { setShowAttachMenu(false); fileInputRef.current?.click(); }} className="flex w-full items-center gap-2 px-3 py-2 text-xs hover:bg-accent">
+                    <Image className="size-3.5" /> Images
+                  </button>
+                  <button type="button" onClick={() => { setShowAttachMenu(false); fileInputRef.current?.click(); }} className="flex w-full items-center gap-2 px-3 py-2 text-xs hover:bg-accent">
+                    <FileText className="size-3.5" /> Documents
+                  </button>
+                  <button type="button" onClick={() => { setShowAttachMenu(false); fileInputRef.current?.click(); }} className="flex w-full items-center gap-2 px-3 py-2 text-xs hover:bg-accent">
+                    <Files className="size-3.5" /> Other Files
+                  </button>
+                </div>
               )}
-            >
-              <MailPlus className="size-3.5" /> Generate
-            </button>
+            </div>
+            <input type="file" ref={fileInputRef} className="hidden" multiple onChange={handleFileChange} />
 
             {/* AI Compose Assist (refine existing body) */}
             <button
               type="button"
-              onClick={() => { setShowAiModal((v) => !v); if (showGenModal) setShowGenModal(false); }}
+              onClick={() => setShowAiModal((v) => !v)}
               aria-label="AI Assist"
               title="AI Compose Assistant – refine & polish"
               className={cn(
